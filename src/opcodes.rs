@@ -37,26 +37,26 @@ impl From<u16> for Inst {
         match op_code {
             0b0001 => match bits!(raw[5]) {
                 0 => Inst::ADD {
-                    dr: bits!(raw[11:9]) as i16,
-                    sr1: bits!(raw[8:6]) as i16,
-                    sr2: bits!(raw[2:0]) as i16,
+                    dr: bits!(raw[11:9]),
+                    sr1: bits!(raw[8:6]),
+                    sr2: bits!(raw[2:0]),
                 },
                 _ => Inst::ADDi {
-                    dr: bits!(raw[11:9]) as i16,
-                    sr1: bits!(raw[8:6]) as i16,
-                    imm: sext(bits!(raw[4:0]), 5) as i16,
+                    dr: bits!(raw[11:9]),
+                    sr1: bits!(raw[8:6]),
+                    imm: sext(bits!(raw[4:0]), 5),
                 },
             },
             0b0101 => match bits!(raw[5]) {
                 0 => Inst::AND {
-                    dr: bits!(raw[11:9]) as i16,
-                    sr1: bits!(raw[8:6]) as i16,
-                    sr2: bits!(raw[2:0]) as i16,
+                    dr: bits!(raw[11:9]),
+                    sr1: bits!(raw[8:6]),
+                    sr2: bits!(raw[2:0]),
                 },
                 _ => Inst::ANDi {
-                    dr: bits!(raw[11:9]) as i16,
-                    sr: bits!(raw[8:6]) as i16,
-                    imm: sext(bits!(raw[4:0]), 5) as i16,
+                    dr: bits!(raw[11:9]),
+                    sr: bits!(raw[8:6]),
+                    imm: sext(bits!(raw[4:0]), 5),
                 },
             },
             0b0000 => Inst::BR {
@@ -65,22 +65,22 @@ impl From<u16> for Inst {
                     z: bits!(raw[10]) == 1,
                     p: bits!(raw[9]) == 1,
                 },
-                pc_offset: sext(bits!(raw[8:0]), 9) as i16,
+                pc_offset: sext(bits!(raw[8:0]), 9),
             },
             0b1100 => Inst::JMP {
-                base_r: bits!(raw[8:6]) as i16,
+                base_r: bits!(raw[8:6]),
             },
             0b0100 => match bits!(raw[11]) {
                 0 => Inst::JSRr {
-                    base_r: bits!(raw[8:6]) as i16,
+                    base_r: bits!(raw[8:6]),
                 },
                 _ => Inst::JSR {
-                    pc_offset: sext(bits!(raw[10:0]), 11) as i16,
+                    pc_offset: sext(bits!(raw[10:0]), 11),
                 },
             },
             0b0010 => Inst::LD {
-                dr: bits!(raw[11:9]) as i16,
-                pc_offset: sext(bits!(raw[8:0]), 9) as i16,
+                dr: bits!(raw[11:9]),
+                pc_offset: sext(bits!(raw[8:0]), 9),
             },
             0b1010 => Inst::LDI {
                 dr: bits!(raw[11:9]),
