@@ -13,6 +13,12 @@ pub struct Condition {
     pub p: bool,
 }
 
+impl Condition {
+    pub fn is_satisfied_by(&self, other: &Condition) -> bool {
+        (self.n && other.n) || (self.z && other.z) || (self.p && other.p)
+    }
+}
+
 impl Default for Condition {
     fn default() -> Self {
         Condition {
