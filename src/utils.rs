@@ -28,3 +28,22 @@ impl Default for Condition {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::Condition;
+
+    #[test]
+    fn test_condition_is_satisfied() {
+        let cond = Condition { n: true, z: false, p: false };
+        let test = Condition { n: true, z: true, p: false };
+        assert_eq!(cond.is_satisfied_by(&test), true);
+        assert_eq!(test.is_satisfied_by(&cond), true);
+
+        let cond = Condition { n: false, z: true, p: false };
+        let test = Condition { n: true, z: false, p: false };
+        assert_eq!(cond.is_satisfied_by(&test), false);
+        assert_eq!(test.is_satisfied_by(&cond), false);
+
+    }
+}

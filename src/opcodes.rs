@@ -1,5 +1,7 @@
 #![allow(clippy::upper_case_acronyms)]
 
+use std::fmt::Display;
+
 use crate::utils::{sext, Condition};
 
 macro_rules! bits {
@@ -14,7 +16,7 @@ macro_rules! bits {
 #[derive(Debug, PartialEq)]
 pub enum Inst {
     ADD { dr: i16, sr1: i16, sr2: i16 },
-    ADDi { dr: i16, sr1: i16, imm: i16 },
+    ADDi { dr: i16, sr: i16, imm: i16 },
     AND { dr: i16, sr1: i16, sr2: i16 },
     ANDi { dr: i16, sr: i16, imm: i16 },
     BR { cond: Condition, pc_offset: i16 },
@@ -45,7 +47,7 @@ impl From<u16> for Inst {
                 },
                 _ => Inst::ADDi {
                     dr: bits!(raw[11:9]),
-                    sr1: bits!(raw[8:6]),
+                    sr: bits!(raw[8:6]),
                     imm: sext(bits!(raw[4:0]), 5),
                 },
             },
@@ -123,6 +125,36 @@ impl From<u16> for Inst {
     }
 }
 
+impl Display for Inst {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Inst::ADD { dr, sr1, sr2 } => write!(f, "ADD r{} r{} r{}", dr, sr1, sr2),
+            Inst::ADDi { dr, sr, imm } => write!(f, "ADD r{} r{} #{}", dr, sr, imm),
+            Inst::AND { dr, sr1, sr2 } => write!(f, "AND r{} r{} r{}", dr, sr1, sr2),
+            Inst::ANDi { dr, sr, imm } => write!(f, "AND r{} r{} #{}", dr, sr, imm),
+            Inst::BR { cond, pc_offset } => write!(f, "BR{}{}{} #{}", 
+                if cond.n { "n" } else { "" },
+                if cond.z { "z" } else { "" },
+                if cond.p { "p" } else { ""},
+                pc_offset
+            ),
+            Inst::JMP { base_r } => write!(f, "JMP r{}", base_r),
+            Inst::JSR { pc_offset } => write!(f, "JSR #{}", pc_offset),
+            Inst::JSRr { base_r } => write!(f, "JSRR r{}", base_r),
+            Inst::LD { dr, pc_offset } => write!(f, "LD r{} #{}", dr, pc_offset),
+            Inst::LDI { dr, pc_offset } => write!(f, "LDI r{} #{}", dr, pc_offset),
+            Inst::LDR { dr, base_r, offset } => write!(f, "LDR r{} r{} #{}", dr, base_r, offset),
+            Inst::LEA { dr, pc_offset } => write!(f, "LEA r{} #{}", dr, pc_offset),
+            Inst::NOT { dr, sr } => write!(f, "NOT r{} r{}", dr, sr),
+            Inst::RTI => write!(f, "RTI"),
+            Inst::ST { sr, pc_offset } => write!(f, "ST r{}, #{}", sr, pc_offset),
+            Inst::STI { sr, pc_offset } => write!(f, "STI r{} #{}", sr, pc_offset),
+            Inst::STR { sr, base_r, offset } => write!(f, "STR r{} r{} #{}", sr, base_r, offset),
+            Inst::TRAP { trap_vect } => write!(f, "TRAP #{}", trap_vect),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::{Condition, Inst};
@@ -160,7 +192,7 @@ mod tests {
         let add_imm_raw = 0b0001_111_011_1_10001;
         let add_imm = Inst::ADDi {
             dr: 7,
-            sr1: 3,
+            sr: 3,
             imm: -15,
         };
         assert_eq!(Inst::from(add_imm_raw), add_imm);
