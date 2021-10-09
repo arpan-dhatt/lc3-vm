@@ -60,7 +60,7 @@ impl LC3 {
             }
             Inst::JSRr { base_r } => {
                 reg![7] = self.pc as i16;
-                self.pc = self.pc.wrapping_add(reg![base_r] as u16);
+                self.pc = reg![base_r] as u16;
             }
             Inst::LD { dr, pc_offset } => {
                 reg![dr] = mem![r, self.pc.wrapping_add(pc_offset as u16)];
@@ -73,12 +73,15 @@ impl LC3 {
             }
             Inst::LDR { dr, base_r, offset } => {
                 reg![dr] = mem![r, reg![base_r].wrapping_add(offset)];
+                self.set_condition(reg![dr]);
             }
             Inst::LEA { dr, pc_offset } => {
                 reg![dr] = self.pc.wrapping_add(pc_offset as u16) as i16;
+                self.set_condition(reg![dr]);
             }
             Inst::NOT { dr, sr } => {
                 reg![dr] = !reg![sr];
+                self.set_condition(reg![dr]);
             }
             Inst::RTI => {
                 unimplemented!();
