@@ -99,16 +99,19 @@ impl LC3 {
                 mem![w, reg![base_r].wrapping_add(offset)] = reg![sr] as u16;
             }
             Inst::TRAP { trap_vect } => match trap_vect {
+                // GETC
                 0x20 => {
                     let mut c = [0; 1];
                     std::io::stdin().lock().read_exact(&mut c).unwrap();
                     reg![0] = c[0] as i16;
                 },
+                // OUT
                 0x21 => {
                     let mut c = [0; 1];
                     c[0] = reg![0] as u8;
                     std::io::stdout().lock().write(&c).unwrap();
                 },
+                // PUTS
                 0x22 => {
                     let mut buf = Vec::new();
                     let mut spot = reg![0] as u16;
@@ -118,7 +121,31 @@ impl LC3 {
                     }
                     std::io::stdout().lock().write_all(&buf).unwrap();
                 },
-                0x25 => self.halted = true,
+                // IN
+                0x23 => {
+                    print!("Input one character: ");
+                    let mut c = [0; 1];
+                    std::io::stdin().lock().read_exact(&mut c).unwrap();
+                    reg![0] = c[0] as i16;
+                },
+                // PUTSP
+                0x24 => {
+                    let mut buf = Vec::new();
+                    let mut spot = reg![0] as u16;
+                    while mem![r, spot] != 0x000 {
+                        buf.push(mem![r, spot] as u8);
+                        if mem![r, spot] >> 8 != 0x0000 {
+                            buf.push((mem![r, spot] >> 8) as u8);
+                        }
+                        spot += 1;
+                    }
+                    std::io::stdout().lock().write_all(&buf).unwrap();
+                },
+                // HALT
+                0x25 => {
+                    self.halted = true;
+                    println!("LC3 Halted");
+                }
                 _ => unimplemented!(),
             },
         };
