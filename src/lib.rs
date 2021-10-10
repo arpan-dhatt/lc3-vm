@@ -1,6 +1,8 @@
 mod opcodes;
 mod utils;
 
+use std::io::{Read, Write};
+
 use opcodes::Inst;
 
 pub struct LC3 {
@@ -97,6 +99,25 @@ impl LC3 {
                 mem![w, reg![base_r].wrapping_add(offset)] = reg![sr] as u16;
             }
             Inst::TRAP { trap_vect } => match trap_vect {
+                0x20 => {
+                    let mut c = [0; 1];
+                    std::io::stdin().lock().read_exact(&mut c).unwrap();
+                    reg![0] = c[0] as i16;
+                },
+                0x21 => {
+                    let mut c = [0; 1];
+                    c[0] = reg![0] as u8;
+                    std::io::stdout().lock().write(&c).unwrap();
+                },
+                0x22 => {
+                    let mut buf = Vec::new();
+                    let mut spot = reg![0] as u16;
+                    while mem![r, spot] != 0x0000 {
+                        buf.push(mem![r, spot] as u8);
+                        spot += 1;
+                    }
+                    std::io::stdout().lock().write_all(&buf).unwrap();
+                },
                 0x25 => self.halted = true,
                 _ => unimplemented!(),
             },
