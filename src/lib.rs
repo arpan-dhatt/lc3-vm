@@ -1,7 +1,7 @@
-mod opcodes;
+pub mod opcodes;
 mod utils;
 
-use std::io::{Read, Write};
+use std::io::{BufRead, Read, Write};
 
 use opcodes::Inst;
 
@@ -109,7 +109,8 @@ impl LC3 {
                 0x21 => {
                     let mut c = [0; 1];
                     c[0] = reg![0] as u8;
-                    std::io::stdout().lock().write(&c).unwrap();
+                    std::io::stdout().lock().write_all(&c).unwrap();
+                    std::io::stdout().flush().unwrap();
                 },
                 // PUTS
                 0x22 => {
@@ -124,15 +125,16 @@ impl LC3 {
                 // IN
                 0x23 => {
                     print!("Input one character: ");
-                    let mut c = [0; 1];
-                    std::io::stdin().lock().read_exact(&mut c).unwrap();
-                    reg![0] = c[0] as i16;
+                    std::io::stdout().flush().unwrap();
+                    let mut buf = String::new();
+                    std::io::stdin().lock().read_line(&mut buf).unwrap();
+                    reg![0] = buf.bytes().next().unwrap() as i16;
                 },
                 // PUTSP
                 0x24 => {
                     let mut buf = Vec::new();
                     let mut spot = reg![0] as u16;
-                    while mem![r, spot] != 0x000 {
+                    while mem![r, spot] != 0x0000 {
                         buf.push(mem![r, spot] as u8);
                         if mem![r, spot] >> 8 != 0x0000 {
                             buf.push((mem![r, spot] >> 8) as u8);
