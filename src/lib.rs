@@ -186,11 +186,12 @@ impl Default for LC3 {
     }
 }
 
+#[allow(clippy::unusual_byte_groupings)]
 #[cfg(test)]
 mod tests {
     use crate::{opcodes::Inst, utils::Condition, LC3};
 
-    const lab1part1: [u16; 19] = [
+    const LAB1PART1: [u16; 19] = [
         0b0010_000_011111111,   // loads X to R0
         0b0010_001_011111111,   // loads Y to R1
         0b0101_011_011_1_00000, // clears R3
@@ -212,7 +213,7 @@ mod tests {
         0b1111_0000_00100101,    // halt
     ];
 
-    const lab1part2: [u16; 25] = [
+    const LAB1PART2: [u16; 25] = [
         0b0101_001_001_1_00000,  // clears R1
         0b0101_100_100_1_00000,  // clears R4
         0b0001_100_100_1_01111,  // sets R4 to 15
@@ -242,7 +243,7 @@ mod tests {
 
     #[test]
     fn test_run_ee306_lab_1_part_1_tc_1() {
-        let mut lc3 = load_lc3(LC3::default(), &lab1part1, 0x3000);
+        let mut lc3 = load_lc3(LC3::default(), &LAB1PART1, 0x3000);
         lc3.memory[0x3100] = 12;
         lc3.memory[0x3101] = 10;
         lc3.run();
@@ -251,7 +252,7 @@ mod tests {
 
     #[test]
     fn test_run_ee306_lab_1_part_1_tc_2() {
-        let mut lc3 = load_lc3(LC3::default(), &lab1part1, 0x3000);
+        let mut lc3 = load_lc3(LC3::default(), &LAB1PART1, 0x3000);
         lc3.memory[0x3100] = !1 + 1;
         lc3.memory[0x3101] = !1 + 1;
         lc3.run();
@@ -260,7 +261,7 @@ mod tests {
 
     #[test]
     fn test_run_ee306_lab_1_part_1_tc_3() {
-        let mut lc3 = load_lc3(LC3::default(), &lab1part1, 0x3000);
+        let mut lc3 = load_lc3(LC3::default(), &LAB1PART1, 0x3000);
         lc3.memory[0x3100] = !10 + 1;
         lc3.memory[0x3101] = 10;
         lc3.run();
@@ -269,7 +270,7 @@ mod tests {
 
     #[test]
     fn test_run_ee306_lab_1_part_2_tc_1() {
-        let mut lc3 = load_lc3(LC3::default(), &lab1part2, 0x3000);
+        let mut lc3 = load_lc3(LC3::default(), &LAB1PART2, 0x3000);
         lc3.memory[0x3100] = 0xFFFF;
         lc3.run();
         assert_eq!(lc3.memory[0x3101], 0);
@@ -277,7 +278,7 @@ mod tests {
 
     #[test]
     fn test_run_ee306_lab_1_part_2_tc_2() {
-        let mut lc3 = load_lc3(LC3::default(), &lab1part2, 0x3000);
+        let mut lc3 = load_lc3(LC3::default(), &LAB1PART2, 0x3000);
         lc3.memory[0x3100] = 0xF0FF;
         lc3.run();
         for i in 0x3000..lc3.pc as usize {
@@ -294,16 +295,14 @@ mod tests {
 
     #[test]
     fn test_run_ee306_lab_1_part_2_tc_3() {
-        let mut lc3 = load_lc3(LC3::default(), &lab1part2, 0x3000);
+        let mut lc3 = load_lc3(LC3::default(), &LAB1PART2, 0x3000);
         lc3.memory[0x3100] = 0x0000;
         lc3.run();
         assert_eq!(lc3.memory[0x3101], 16);
     }
 
     fn load_lc3(mut vm: LC3, code: &[u16], start: usize) -> LC3 {
-        for i in 0..code.len() {
-            vm.memory[start + i] = code[i];
-        }
+        vm.memory[start..(code.len() + start)].clone_from_slice(code);
         vm
     }
 }
